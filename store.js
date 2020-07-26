@@ -35,14 +35,14 @@ export default async (mikser) => {
 		},
 		actions: {
 			init({ commit }) {
-				window.whitebox.init('data', (data) => {
-					console.log('Data loaded')
-					window.whitebox.emmiter.on('data.change', (change) => {
+				window.whitebox.init('feed', (feed) => {
+					console.log('Feed loaded')
+					window.whitebox.emmiter.on('feed.change', (change) => {
 						commit('updateDocuments', change)
 					})
-					data.service.vaults.mikser
+					feed.service.vaults.mikser
 						.find({
-							vault: 'data',
+							vault: 'feed',
 							cache: '1h',
 							query: {
 								context: 'mikser',
@@ -53,7 +53,7 @@ export default async (mikser) => {
 							for (let document of documents) {
 								commit('assignDocument', document)
 							}
-							data.service.vaults.mikser.changes({ vault: 'data', query: { context: 'mikser' } })
+							feed.service.vaults.mikser.changes({ vault: 'feed', query: { context: 'mikser' } })
 						})
 				})
 			},
@@ -61,7 +61,7 @@ export default async (mikser) => {
 				if (state.initialized) return
 				let { lang } = mikser.routes[decodeURI(window.location.pathname)]
 				if (items.length) {
-					window.whitebox.init('data', (data) => {
+					window.whitebox.init('feed', (feed) => {
 						let refIds = []
 						for (let item of items) {
 							if (typeof item == 'string') {
@@ -71,9 +71,9 @@ export default async (mikser) => {
 										.map((reverse) => reverse.refId)
 								)
 							} else {
-								data.service.vaults.mikser
+								feed.service.vaults.mikser
 									.find({
-										vault: 'data',
+										vault: 'feed',
 										query: Object.assign(item, {
 											context: 'mikser',
 										}),
@@ -85,9 +85,9 @@ export default async (mikser) => {
 									})
 							}
 						}
-						data.service.vaults.mikser
+						feed.service.vaults.mikser
 							.find({
-								vault: 'data',
+								vault: 'feed',
 								cache: '1h',
 								query: {
 									context: 'mikser',

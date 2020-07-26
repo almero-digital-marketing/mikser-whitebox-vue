@@ -11,10 +11,10 @@ export default async (mikser) => {
 	mikser.routes = {}
 	mikser.reverse = {}
 	return new Promise((resolve, reject) => {
-		window.whitebox.init('data', (data) => {
-			data.service.vaults.mikser
+		window.whitebox.init('feed', (feed) => {
+			feed.service.vaults.mikser
 				.find({
-					vault: 'data',
+					vault: 'feed',
 					query: { context: 'mikser' },
 					projection: {
 						'data.meta.layout': 1,

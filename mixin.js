@@ -26,17 +26,28 @@ export default (mikser) => {
 					lang ||
 					(mikser.routes[this.$route.path] &&
 						mikser.routes[this.$route.path].lang) ||
-					document.documentElement.lang ||
-					''
-				let hreflang = this.sitemap[lang]
-				if (hreflang) {
-					let document = hreflang[href]
-					if (document) {
-						return {
-							meta: document.data.meta,
-							link: document.refId,
-						}
-					}
+						document.documentElement.lang ||
+						''
+						let hreflang = this.sitemap[lang]
+						if (hreflang) {
+							let document = hreflang[href]
+							if (document) {
+								return {
+									meta: document.data.meta,
+									link: document.refId,
+								} 
+							} else {
+								let reverse = mikser.reverse[href]
+								if (reverse) {
+									let route = reverse.find(record => record.lang == lang)
+									if (route) {
+										return {
+											link: route.refId,
+											meta: {}
+										}
+									}
+								}
+							}
 				}
 				return {
 					meta: {},
@@ -62,6 +73,15 @@ export default (mikser) => {
 		},
 		created() {
 			this.$load(this.documents)
+		},
+		metaInfo() {
+			if (this.document) {
+				return {
+					title: this.document.meta.title,
+					description: this.document.meta.description,
+					meta: this.document.meta.meta
+				}
+			}
 		}
 	}
 }
