@@ -1,5 +1,7 @@
 import { mapState, mapActions } from 'vuex'
 
+let storageMap = {}
+
 export default (mikser) => {
 	return {
 		data() {
@@ -64,9 +66,14 @@ export default (mikser) => {
 			},
 			storage(file) {
 				if (window.whitebox.services && window.whitebox.services.storage) {
-					return window.whitebox.services.storage.link({
-						file,
-					})
+					let link = storageMap[file]
+					if (!link) {
+						link = window.whitebox.services.storage.link({
+							file,
+						})
+						storageMap[file] = link
+					}
+					return link
 				}
 				return file
 			},
