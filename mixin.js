@@ -1,4 +1,4 @@
-import { mapState, mapActions } from 'vuex'
+import { mapState, mapActions, mapGetters } from 'vuex'
 
 let storageMap = {}
 
@@ -11,6 +11,7 @@ export default (mikser) => {
 		},
 		computed: {
 			...mapState('mikser', ['loaded', 'sitemap']),
+			...mapGetters('mikser', ['storage', 'alternates']),
 			document() {
 				let route = mikser.routes[this.$route.path]
 				if (!route) return
@@ -30,52 +31,31 @@ export default (mikser) => {
 						mikser.routes[this.$route.path].lang) ||
 						document.documentElement.lang ||
 						''
-						let hreflang = this.sitemap[lang]
-						if (hreflang) {
-							let document = hreflang[href]
-							if (document) {
+				let hreflang = this.sitemap[lang]
+				if (hreflang) {
+					let document = hreflang[href]
+					if (document) {
+						return {
+							meta: document.data.meta,
+							link: document.refId,
+						} 
+					} else {
+						let reverse = mikser.reverse[href]
+						if (reverse) {
+							let route = reverse.find(record => record.lang == lang)
+							if (route) {
 								return {
-									meta: document.data.meta,
-									link: document.refId,
-								} 
-							} else {
-								let reverse = mikser.reverse[href]
-								if (reverse) {
-									let route = reverse.find(record => record.lang == lang)
-									if (route) {
-										return {
-											link: route.refId,
-											meta: {}
-										}
-									}
+									link: route.refId,
+									meta: {}
 								}
 							}
+						}
+					}
 				}
 				return {
 					meta: {},
 					link: '/' + lang + href,
 				}
-			},
-			alternates(href) {
-				let documents = []
-				for (let lang of this.sitemap) {
-					let document = this.sitemap[lang][href]
-					if (document) documents.push(document)
-				}
-				return documents
-			},
-			storage(file) {
-				if (window.whitebox.services && window.whitebox.services.storage) {
-					let link = storageMap[file]
-					if (!link) {
-						link = window.whitebox.services.storage.link({
-							file,
-						})
-						storageMap[file] = link
-					}
-					return link
-				}
-				return file
 			},
 		},
 		created() {

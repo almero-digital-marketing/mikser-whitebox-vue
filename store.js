@@ -1,11 +1,36 @@
 import Vue from 'vue'
 
+let storageMap = {}
+
 export default async (mikser) => {
 	mikser.store.registerModule('mikser', {
 		namespaced: true,
 		state: {
 			sitemap: {},
 			initialized: false,
+		},
+		getters: {
+			storage: () => (file) => {
+				if (window.whitebox.services && window.whitebox.services.storage) {
+					let link = storageMap[file]
+					if (!link) {
+						link = window.whitebox.services.storage.link({
+							file,
+						})
+						storageMap[file] = link
+					}
+					return link
+				}
+				return file
+			},
+			alternates: (state) => (href) => {
+				let documents = []
+				for (let lang of state.sitemap) {
+					let document = state.sitemap[lang][href]
+					if (document) documents.push(document)
+				}
+				return documents
+			},
 		},
 		mutations: {
 			updateDocuments(state, change) {
