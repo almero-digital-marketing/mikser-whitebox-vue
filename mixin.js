@@ -1,7 +1,5 @@
 import { mapState, mapActions, mapGetters } from 'vuex'
 
-let storageMap = {}
-
 export default (mikser) => {
 	return {
 		data() {
