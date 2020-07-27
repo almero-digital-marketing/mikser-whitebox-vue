@@ -3,11 +3,24 @@ export default async (mikser) => {
 	for (let route of mikser.router.options.routes) {
 		components[route.name] = route.component
 	}
+	
 	mikser.router.beforeEach((to, from, next) => {
 		document.documentElement.lang =
 			to.params.lang || document.documentElement.lang
 		next()
 	})
+	
+	mikser.router.afterEach((to) => {
+		window.whitebox.init('analytics', analytics => {
+			if (analytics) {
+				setTimeout(() => {
+					console.log('Track route:', to.path)
+					analytics.service.info()
+				}, 100)
+			}
+		})
+	})
+
 	mikser.routes = {}
 	mikser.reverse = {}
 	return new Promise((resolve, reject) => {
