@@ -136,7 +136,7 @@ export default async (mikser) => {
 						)
 					})
 				}
-				Promise.all[loading].then(() => commit('finishLoading'))
+				Promise.all(loading).then(() => commit('finishLoading'))
 			},
 		},
 	})
