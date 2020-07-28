@@ -7,6 +7,7 @@ export default async (mikser) => {
 		namespaced: true,
 		state: {
 			sitemap: {},
+			loaded: false,
 			initialized: false,
 		},
 		getters: {
@@ -57,6 +58,9 @@ export default async (mikser) => {
 				Vue.set(state.sitemap[lang], href, Object.freeze(document))
 				console.log('Load time:', Date.now() - window.startTime + 'ms', document.refId)
 			},
+			finishLoading(state) {
+				state.loaded = true
+			}
 		},
 		actions: {
 			init({ commit }) {
@@ -85,6 +89,7 @@ export default async (mikser) => {
 			load({ commit, state }, items) {
 				if (state.initialized) return
 				let { lang } = mikser.routes[decodeURI(window.location.pathname)]
+				let loading = []
 				if (items.length) {
 					window.whitebox.init('feed', (feed) => {
 						let refIds = []
@@ -96,37 +101,42 @@ export default async (mikser) => {
 										.map((reverse) => reverse.refId)
 								)
 							} else {
-								feed.service.vaults.mikser
-									.find({
-										vault: 'feed',
-										query: Object.assign(item, {
-											context: 'mikser',
-										}),
-									})
-									.then((documents) => {
-										for (let document of documents) {
-											commit('assignDocument', document)
-										}
-									})
+								loading.push(
+									feed.service.vaults.mikser
+										.find({
+											vault: 'feed',
+											query: Object.assign(item, {
+												context: 'mikser',
+											}),
+										})
+										.then((documents) => {
+											for (let document of documents) {
+												commit('assignDocument', document)
+											}
+										})
+								)
 							}
 						}
-						feed.service.vaults.mikser
-							.find({
-								vault: 'feed',
-								cache: '1h',
-								query: {
-									context: 'mikser',
-									refId: {
-										$in: refIds,
+						loading.push(
+							feed.service.vaults.mikser
+								.find({
+									vault: 'feed',
+									cache: '1h',
+									query: {
+										context: 'mikser',
+										refId: {
+											$in: refIds,
+										},
 									},
-								},
-							})
-							.then((documents) => {
-								for (let document of documents) {
-									commit('assignDocument', document)
-								}
-							})
+								})
+								.then((documents) => {
+									for (let document of documents) {
+										commit('assignDocument', document)
+									}
+								})
+						)
 					})
+					Promise.all[loading].then(() => commit('finishLoading'))
 				}
 			},
 		},
