@@ -87,17 +87,16 @@ export default async (mikser) => {
 				})
 			},
 			load({ commit, state }, items) {
-				if (state.initialized) return
-				let { lang } = mikser.routes[decodeURI(window.location.pathname)]
 				let loading = []
-				if (items.length) {
+				let route = mikser.routes[decodeURI(window.location.pathname)]
+				if (!state.initialized && route && items.length) {
 					window.whitebox.init('feed', (feed) => {
 						let refIds = []
 						for (let item of items) {
 							if (typeof item == 'string') {
 								refIds.push(
 									...mikser.reverse[item]
-										.filter((reverse) => reverse.lang == lang && (!state.sitemap[lang] || !state.sitemap[lang][item]))
+										.filter((reverse) => reverse.lang == route.lang && (!state.sitemap[route.lang] || !state.sitemap[route.lang][item]))
 										.map((reverse) => reverse.refId)
 								)
 							} else {
@@ -136,8 +135,8 @@ export default async (mikser) => {
 								})
 						)
 					})
-					Promise.all[loading].then(() => commit('finishLoading'))
 				}
+				Promise.all[loading].then(() => commit('finishLoading'))
 			},
 		},
 	})
