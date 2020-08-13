@@ -89,30 +89,32 @@ export default async (mikser) => {
 			load({ commit, state }, items) {
 				let loading = []
 				let route = mikser.routes[decodeURI(window.location.pathname)]
-				if (!state.initialized && route && items.length) {
+				if (!state.initialized && items.length) {
 					window.whitebox.init('feed', (feed) => {
 						let refIds = []
 						for (let item of items) {
 							if (typeof item == 'string') {
-								refIds.push(
-									...mikser.reverse[item]
+								if (route) {
+									refIds.push(
+										...mikser.reverse[item]
 										.filter((reverse) => reverse.lang == route.lang && (!state.sitemap[route.lang] || !state.sitemap[route.lang][item]))
 										.map((reverse) => reverse.refId)
-								)
-							} else {
-								loading.push(
-									feed.service.vaults.mikser
+										)
+									}
+								} else {
+									loading.push(
+										feed.service.vaults.mikser
 										.find({
 											vault: 'feed',
 											query: Object.assign(item, {
 												context: 'mikser',
-											}),
-										})
-										.then((documents) => {
-											for (let document of documents) {
-												commit('assignDocument', document)
-											}
-										})
+										}),
+									})
+									.then((documents) => {
+										for (let document of documents) {
+											commit('assignDocument', document)
+										}
+									})
 								)
 							}
 						}

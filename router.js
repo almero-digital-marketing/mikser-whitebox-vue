@@ -41,16 +41,15 @@ export default async (mikser) => {
 				.then((documents) => {
 					mikser.stamp = Date.now()
 					let routes = documents.map((document) => {
-						mikser.routes[document.refId] = {
-							lang: document.data.meta.lang,
-							href: document.data.meta.href,
-						}
 						mikser.reverse[document.data.meta.href] = mikser.reverse[document.data.meta.href] || []
 						mikser.reverse[document.data.meta.href].push({ 
 							refId: document.refId,
 							lang: document.data.meta.lang
 						})
-						
+						mikser.routes[document.refId] = {
+							lang: document.data.meta.lang,
+							href: document.data.meta.href,
+						}
 						return {
 							path: document.refId,
 							component: components[document.data.meta.layout],
@@ -58,8 +57,8 @@ export default async (mikser) => {
 							props: mikser.routes[document.refId],
 						}
 					})
+					mikser.router.addRoutes(routes.filter(route => route.component))
 					console.log('Routes:', routes.length, Date.now() - window.startTime + 'ms')
-					mikser.router.addRoutes(routes)
 					resolve()
 				})
 				.catch(reject)
