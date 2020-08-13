@@ -39,6 +39,7 @@ export default (mikser) => {
 							let document = hreflang[href]
 							if (document) {
 								return {
+									loaded: true,
 									meta: document.data.meta,
 									link: document.refId,
 								}
@@ -68,6 +69,7 @@ export default (mikser) => {
 					let document = hreflang[href]
 					if (document) {
 						return {
+							loaded: true,
 							meta: document.data.meta,
 							link: document.refId,
 						}
