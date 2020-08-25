@@ -4,11 +4,12 @@ export default (mikser) => {
 	return {
 		data() {
 			return {
+				loaded: false,
 				documents: [],
 			}
 		},
 		computed: {
-			...mapState('mikser', ['loaded', 'sitemap']),
+			...mapState('mikser', ['sitemap']),
 			...mapGetters('mikser', ['storage', 'alternates']),
 			document() {
 				let route = mikser.routes[this.$route.path]
@@ -69,7 +70,6 @@ export default (mikser) => {
 					let document = hreflang[href]
 					if (document) {
 						return {
-							loaded: true,
 							meta: document.data.meta,
 							link: document.refId,
 						}
@@ -93,7 +93,11 @@ export default (mikser) => {
 			},
 		},
 		created() {
-			this.$load(this.documents)
+			if (!this.loaded) {
+				this.$load(this.documents).then(() => {
+					this.loaded = true
+				})
+			}
 		},
 		metaInfo() {
 			if (this.document) {

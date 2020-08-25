@@ -7,7 +7,6 @@ export default async (mikser) => {
 		namespaced: true,
 		state: {
 			sitemap: {},
-			loaded: false,
 			initialized: false,
 		},
 		getters: {
@@ -53,14 +52,10 @@ export default async (mikser) => {
 			assignDocument(state, document) {
 				let href = document.data.meta.href || document.data.refId
 				let lang = document.data.meta.lang || ''
-
 				if (!state.sitemap[lang]) Vue.set(state.sitemap, lang, {})
 				Vue.set(state.sitemap[lang], href, Object.freeze(document))
 				console.log('Load time:', Date.now() - window.startTime + 'ms', document.refId)
 			},
-			finishLoading(state) {
-				state.loaded = true
-			}
 		},
 		actions: {
 			init({ commit }) {
@@ -99,15 +94,15 @@ export default async (mikser) => {
 										...mikser.reverse[item]
 										.filter((reverse) => reverse.lang == route.lang && (!state.sitemap[route.lang] || !state.sitemap[route.lang][item]))
 										.map((reverse) => reverse.refId)
-										)
-									}
-								} else {
-									loading.push(
-										feed.service.vaults.mikser
-										.find({
-											vault: 'feed',
-											query: Object.assign(item, {
-												context: 'mikser',
+									)
+								}
+							} else {
+								loading.push(
+									feed.service.vaults.mikser
+									.find({
+										vault: 'feed',
+										query: Object.assign(item, {
+											context: 'mikser',
 										}),
 									})
 									.then((documents) => {
@@ -138,7 +133,7 @@ export default async (mikser) => {
 						)
 					})
 				}
-				Promise.all(loading).then(() => commit('finishLoading'))
+				return Promise.all(loading)
 			},
 		},
 	})
