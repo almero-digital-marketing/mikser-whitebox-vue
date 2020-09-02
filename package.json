@@ -1,6 +1,6 @@
 {
   "name": "mikser-whitebox-vue",
-  "version": "1.0.15",
+  "version": "2.0.4",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/almero-digital-marketing/mikser-whitebox-vue#readme",
   "dependencies": {
+    "node-machine-id": "^1.1.12",
     "vue": "^2.6.11",
     "vuex": "^3.5.1"
   }

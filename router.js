@@ -25,19 +25,24 @@ export default async (mikser) => {
 	mikser.reverse = {}
 	return new Promise((resolve, reject) => {
 		window.whitebox.init('feed', (feed) => {
-			feed.service.vaults.mikser
-				.find({
-					vault: 'feed',
-					query: { context: 'mikser' },
-					projection: {
-						'data.meta.layout': 1,
-						refId: 1,
-						'data.meta.href': 1,
-						'data.meta.lang': 1,
-						'data.meta.type': 1,
-					},
-					cache: '1h',
-				})
+			let data = {
+				vault: 'feed',
+				query: { context: 'mikser' },
+				projection: {
+					'data.meta.layout': 1,
+					refId: 1,
+					'data.meta.href': 1,
+					'data.meta.lang': 1,
+					'data.meta.type': 1,
+				},
+				cache: '1h',
+			}
+			if (process.env.VUE_APP_WHITEBOX_CONTEXT) {
+				data.context = process.env.VUE_APP_WHITEBOX_CONTEXT
+				data.query.context = data.query.context + '_' + data.context
+			}
+			feed.service.catalogs.mikser
+				.find(data)
 				.then((documents) => {
 					mikser.stamp = Date.now()
 					let routes = documents.map((document) => {

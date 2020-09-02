@@ -14,9 +14,13 @@ export default async (mikser) => {
 				if (window.whitebox.services && window.whitebox.services.storage) {
 					let link = storageMap[file]
 					if (!link) {
-						link = window.whitebox.services.storage.link({
-							file,
-						})
+						let data = {
+							file
+						}
+						if (process.env.VUE_APP_WHITEBOX_CONTEXT) {
+							data.context = process.env.VUE_APP_WHITEBOX_CONTEXT
+						}
+						link = window.whitebox.services.storage.link(data)
 						storageMap[file] = link
 					}
 					return link
@@ -64,20 +68,30 @@ export default async (mikser) => {
 					window.whitebox.emmiter.on('feed.change', (change) => {
 						commit('updateDocuments', change)
 					})
-					feed.service.vaults.mikser
-						.find({
-							vault: 'feed',
-							cache: '1h',
-							query: {
-								context: 'mikser',
-								refId: decodeURI(window.location.pathname),
-							},
-						})
+					let data = {
+						vault: 'feed',
+						cache: '1h',
+						query: {
+							context: 'mikser',
+							refId: decodeURI(window.location.pathname),
+						},
+					}
+					if (process.env.VUE_APP_WHITEBOX_CONTEXT) {
+						data.context = process.env.VUE_APP_WHITEBOX_CONTEXT
+						data.query.context = data.query.context + '_' + data.context
+					}
+					feed.service.catalogs.mikser.find(data)
 						.then((documents) => {
 							for (let document of documents) {
 								commit('assignDocument', document)
 							}
-							feed.service.vaults.mikser.changes({ vault: 'feed', query: { context: 'mikser' } })
+							feed.service.catalogs.mikser.changes({ 
+								vault: 'feed', 
+								context: data.context,
+								query: { 
+									context: data.query.context 
+								} 
+							})
 						})
 				})
 			},
@@ -97,14 +111,19 @@ export default async (mikser) => {
 									)
 								}
 							} else {
+								let data = {
+									vault: 'feed',
+									query: Object.assign(item, {
+										context: 'mikser',
+									}),
+								}
+								if (process.env.VUE_APP_WHITEBOX_CONTEXT) {
+									data.context = process.env.VUE_APP_WHITEBOX_CONTEXT
+									data.query.context = data.query.context + '_' + data.context
+								}
 								loading.push(
-									feed.service.vaults.mikser
-									.find({
-										vault: 'feed',
-										query: Object.assign(item, {
-											context: 'mikser',
-										}),
-									})
+									feed.service.catalogs.mikser
+									.find(data)
 									.then((documents) => {
 										for (let document of documents) {
 											commit('assignDocument', document)
@@ -113,18 +132,23 @@ export default async (mikser) => {
 								)
 							}
 						}
+						let data = {
+							vault: 'feed',
+							cache: '1h',
+							query: {
+								context: 'mikser',
+								refId: {
+									$in: refIds,
+								},
+							},
+						}
+						if (process.env.VUE_APP_WHITEBOX_CONTEXT) {
+							data.context = process.env.VUE_APP_WHITEBOX_CONTEXT
+							data.query.context = data.query.context + '_' + data.context
+						}
 						loading.push(
-							feed.service.vaults.mikser
-								.find({
-									vault: 'feed',
-									cache: '1h',
-									query: {
-										context: 'mikser',
-										refId: {
-											$in: refIds,
-										},
-									},
-								})
+							feed.service.catalogs.mikser
+								.find(data)
 								.then((documents) => {
 									for (let document of documents) {
 										commit('assignDocument', document)
